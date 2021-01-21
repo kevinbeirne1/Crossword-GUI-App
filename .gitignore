@@ -1,10 +1,10 @@
 # Files/folders to ignore
-/idea
-/build
-/dist
+.idea/
+.build/
+.dist/
 cli.py
 cli.spec
-/crossword_gui/archive/
+.crossword_gui/archive/
 
 
 # Byte-compiled / optimized / DLL files
