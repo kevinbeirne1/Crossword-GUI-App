@@ -1,5 +1,3 @@
-# Example Package
+# Crossword GUI
 
-This is a simple example package. You can use 
-[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
-to write your content.
+The Crossword GUI is an app to scrape the New Yorker website for links to their crosswords and display them in the GUI. Intention for future revisions is among other things to enable offline solving of the crosswords
