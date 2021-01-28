@@ -5,7 +5,7 @@
 cli.py
 cli.spec
 .crossword_gui/archive/
-*.data.json
+.crossword_gui/data.json
 README.md
 
 
