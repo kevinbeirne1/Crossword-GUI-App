@@ -8,7 +8,6 @@ cli.spec
 .crossword_gui/data.json
 README.md
 data.json
-sample.sample
 
 
 # Byte-compiled / optimized / DLL files
