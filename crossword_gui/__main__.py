@@ -31,7 +31,7 @@ from scrapy.exporters import JsonLinesItemExporter
 
 class SpiderManager:
     def __init__(self):
-        # self.run_spider()
+        self.run_spider()
         self.update_json()
         self.crossword_data = self.read_json()
         self.last_updated = self.crossword_data.pop("last_updated")
@@ -71,7 +71,7 @@ class SpiderManager:
         SpiderManager.write_json(crossword_data)
         try:
             Path.cwd()/Path(spider_file).unlink()
-        except FileNotFoundError:
+        except (FileNotFoundError, TypeError) as e:
             pass
 
     def run_spider(self):
