@@ -10,23 +10,20 @@ https://docs.scrapy.org/en/latest/intro/tutorial.html#following-links
 
 """
 
-import datetime
 import json
 import re
-import scrapy
-import sys
-import unittest
 
+import sys
+import scrapy
+import pyinputplus as pyip
 from collections import OrderedDict
 from operator import itemgetter
 from pathlib import Path
 from PyQt5.QtCore import QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWidgets import (QApplication, QDialog, QGroupBox,
-                             QVBoxLayout, QMainWindow, QListWidget,
-                             QHBoxLayout)
+from PyQt5.QtWidgets import (QApplication, QDialog, QGroupBox, QVBoxLayout,
+                             QListWidget, QHBoxLayout)
 from scrapy.crawler import CrawlerProcess
-from scrapy.exporters import JsonLinesItemExporter
 
 
 class SpiderManager:
@@ -37,13 +34,13 @@ class SpiderManager:
         self.last_updated = self.crossword_data.pop("last_updated")
 
     @staticmethod
-    def write_json(data, filename="data.json"):
+    def write_json(data, filename="crossword_data.json"):
         """Write data to JSON file"""
         with open(filename, "w") as f:
             json.dump(data, f, indent=4)
 
     @staticmethod
-    def read_json(filename="data.json"):
+    def read_json(filename="crossword_data.json"):
         """Get data from JSON file"""
         try:
             with open(filename) as json_file:
@@ -55,7 +52,8 @@ class SpiderManager:
         return data
 
     @staticmethod
-    def update_json(spider_file="crossword_spider.json", data_file="data.json"):
+    def update_json(spider_file="crossword_spider.json",
+                    data_file="crossword_data.json"):
         spider_data = SpiderManager.read_json(spider_file)
         sorted_spider = sorted(spider_data, key=itemgetter("date"))
         crossword_data = OrderedDict(SpiderManager.read_json(data_file))
@@ -74,22 +72,18 @@ class SpiderManager:
         except (FileNotFoundError, TypeError) as e:
             pass
 
+    def check_run(func):
+        """Ask user if they wish to run the spider & run if yes"""
+        def wrapper(*args, **kwargs):
+            if pyip.inputYesNo("Do you want to run the spider (yes/no)?") \
+                    == "yes":
+                func(*args, **kwargs)
+        return wrapper
+
+    @check_run
     def run_spider(self):
         """Run Spider if Mon/Wed/Fri or if no links saved"""
 
-        # TODO - Add check so that spider doesn't run everytime
-        # last_update = self.last_updated
-        """ run if - 
-        - no data.json
-        - if mon/wed/fri & last_update != today
-        
-
-        # if not last_update or
-
-        # crossword_day = datetime.date.today().weekday() in [0, 2, 4]
-        # data_exists = Path(".data/json").is_file()
-        # if crossword_day or not data_exists:
-        """
         process = CrawlerProcess({"FEED_FORMAT": "json",
                                   "FEED_URI": "crossword_spider.json",
                                   })
@@ -170,7 +164,6 @@ class WidgetGallery(QDialog):
 
     def clicked(self):
         item = self.crossword_list.currentItem()
-        # self.change_site("https://www.newyorker.com" + self.button_links[item.text()])
         self.change_site(self.button_links[item.text()])
 
     def create_left_group_box(self):
@@ -190,8 +183,6 @@ class WidgetGallery(QDialog):
     def create_embedded_browser(self):
         _embedded_browser = QWebEngineView()
         _embedded_browser.setUrl(QUrl("http://google.com"))
-        # direct_site = "https://cdn3.amuselabs.com/tny/crossword?id=c36233cb&set=tny-weekly&embed=1&compact=1&maxCols=2&src=http%3A%2F%2Fwww.newyorker.com%2Fpuzzles-and-games-dept%2Fcrossword%2F2021%2F01%2F08"
-        # _embedded_browser.setUrl(QUrl(direct_site))
         return _embedded_browser
 
     def create_right_group_box(self):

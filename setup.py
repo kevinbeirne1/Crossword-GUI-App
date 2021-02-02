@@ -5,7 +5,6 @@ import setuptools
 here = os.path.abspath(os.path.dirname(__file__))
 
 
-
 with open(os.path.join(here, "README.md"), "r", encoding="utf-8") as fh:
     read_me = fh.read()
 
@@ -26,7 +25,7 @@ setuptools.setup(
     ],
     packages=["crossword_gui"],
     python_requires='>=3.6',
-    install_requires=[scrapy, PyQt5],
-    entry_points={"console_scripts": ["crossword_tool=crossword_gui.__main__:main]}
+    # install_requires=[scrapy, PyQt5],
+    entry_points={"console_scripts": ["crossword_tool=crossword_gui.__main__:main"]}
 
 )
