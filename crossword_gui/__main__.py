@@ -17,6 +17,7 @@ import sys
 import scrapy
 import pyinputplus as pyip
 from collections import OrderedDict
+from datetime import datetime
 from operator import itemgetter
 from pathlib import Path
 from PyQt5.QtCore import QUrl
@@ -24,9 +25,37 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import (QApplication, QDialog, QGroupBox, QVBoxLayout,
                              QListWidget, QHBoxLayout)
 from scrapy.crawler import CrawlerProcess
+from scrapy.item import Item, Field
+from scrapy.exceptions import DropItem
+
+
+class FormatItemPipeline:
+    """Format spider item data for readability"""
+    def process_item(self, item, spider):
+        try:
+            item["name"] = re.match(r".+\:\s?(.*)", item["name"]).group(1)
+            item["date"] = datetime.strptime(item['date'], "%B %d, %Y")
+            item['url'] = re.match("(.+weekly)", item['url']).group(1)
+        except:
+            DropItem("Link is article, Not crossword")
+        return item
+
+
+class SaveItemPipeline:
+    """Append item to list in SpiderManager"""
+    def process_item(self, item, spider):
+        SpiderManager.spider_data.append(item)
+
+
+class MyItem(Item):
+    name = Field()
+    date = Field()
+    url = Field()
+    author = Field()
 
 
 class SpiderManager:
+    spider_data = []
     def __init__(self):
         self.run_spider()
         self.update_json()
@@ -52,25 +81,23 @@ class SpiderManager:
         return data
 
     @staticmethod
-    def update_json(spider_file="crossword_spider.json",
-                    data_file="crossword_data.json"):
-        spider_data = SpiderManager.read_json(spider_file)
-        sorted_spider = sorted(spider_data, key=itemgetter("date"))
+    def update_json(data_file="crossword_data.json"):
+        """Read spider.json, update data.json, and delete spider.json"""
+        sorted_spider = sorted(SpiderManager.spider_data,
+                               key=itemgetter("date"))
         crossword_data = OrderedDict(SpiderManager.read_json(data_file))
 
         for crossword in sorted_spider:
-            crossword_data.update({crossword["name"]: crossword["url"]})
-            crossword_data.move_to_end(crossword['name'], last=False)
-        if sorted_spider:
-            crossword_data.update({"last_updated": sorted_spider[0]["date"]})
-        else:
-            crossword_data["last_updated"] = None
-
+            name = f'{crossword["name"]} - {crossword["author"]}'
+            crossword_data.update({name: crossword["url"]})
+            crossword_data.move_to_end(name, last=False)
+        # if sorted_spider:
+        crossword_data.update(
+            {"last_updated": str(sorted_spider[0]["date"])}
+        )
+        # else:
+        #     crossword_data["last_updated"] = None
         SpiderManager.write_json(crossword_data)
-        try:
-            Path.cwd()/Path(spider_file).unlink()
-        except (FileNotFoundError, TypeError) as e:
-            pass
 
     def check_run(func):
         """Ask user if they wish to run the spider & run if yes"""
@@ -84,9 +111,12 @@ class SpiderManager:
     def run_spider(self):
         """Run Spider if Mon/Wed/Fri or if no links saved"""
 
-        process = CrawlerProcess({"FEED_FORMAT": "json",
-                                  "FEED_URI": "crossword_spider.json",
-                                  })
+        process = CrawlerProcess({
+            "ITEM_PIPELINES": {
+                FormatItemPipeline: 100,
+                SaveItemPipeline: 200,
+            },
+        })
         process.crawl(NewYorkerSpider)
         process.start()
 
@@ -107,34 +137,22 @@ class NewYorkerSpider(scrapy.Spider):
 
         crossword_links = response.css("li.River__riverItem___3huWr")
         for crossword_link in crossword_links:
+            item = MyItem()
             url = crossword_link.css("a::attr(href)").get()
-            full_name = crossword_link.css("h4::text").get()
-            # Pull the crossword publish date for later sorting
-            try:
-                url_date = re.search("\d{4}/\d{2}/\d{2}", url).group()
-                short_name = re.match(r".+\:\s?(.*)", full_name).group(1)
-            except AttributeError:
-                continue
+            item['name'] = crossword_link.css("h4::text").get()
+            item['author'] = crossword_link.css("p a::text").get()
+            item['date'] = crossword_link.css("h6::text").get()
 
-            # Remove "The Crossword: " preamble on name
-
-            author = crossword_link.css("p a::text").get()
-            name_author = f"{short_name} - {author}"
-            if name_author in previously_scraped:
-                break
-
+            # if url in previously_scraped.values():
+            #     break
             yield response.follow(url, self.parse_crossword,
-                                  cb_kwargs=dict(name=name_author,
-                                                 date=url_date))
+                                  cb_kwargs=dict(item=item,)
+                                  )
 
-    def parse_crossword(self, response, name, date):
-        url = response.css("div.crossword-embed iframe::attr(data-src)").get()
-        short_url = re.match("(.+weekly)", url).group(1)
-        yield{
-            "name": name,
-            "date": date,
-            "url": short_url
-        }
+    def parse_crossword(self, response, item):
+        item['url'] = response.xpath(
+            "//iframe[@id='crossword']/@data-src").get()
+        yield item
 
 
 def window():
