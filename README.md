@@ -1,5 +1,5 @@
 # Crossword GUI
-The Crossword GUI is a python script to gather the latest crosswords from the New Yorker into a single app. 
+The Crossword GUI is a Python script to gather the latest crosswords from the New Yorker into a single app. 
 
 CONTENTS
 ========
@@ -11,15 +11,15 @@ CONTENTS
 
 ## Why
 ### Background
-Over the course of the Covid induced lockdown I became increasingly interested in solving crosswords and almost exclusively the New York Times (NYT) crossword.
-During this time of increased interest in crosswords I became aware of some very public and damning criticisms of the NYT crossword (including the [Atlantic](https://www.theatlantic.com/culture/archive/2020/03/fight-to-make-crosswords-more-inclusive/608212/) and [Time](https://time.com/5871704/erik-agard-usatoday-crossword-diversity/) magazines).
-I then started searching for other outlets and was drawn to the New Yorker puzzles because of their (subjectively) great puzzle creators.
+Over the course of the Covid-induced lockdown I became increasingly interested in solving crosswords and almost exclusively dedicated to the New York Times (NYT) crossword.
+During this time of increased interest in crosswords I became aware of some very public and damning criticisms of the NYT crossword (including from the [Atlantic](https://www.theatlantic.com/culture/archive/2020/03/fight-to-make-crosswords-more-inclusive/608212/) and [Time](https://time.com/5871704/erik-agard-usatoday-crossword-diversity/) magazines).
+I then started searching for other outlets and was drawn to the New Yorker puzzles because of their great puzzle creators.
 
 ### No New Yorker Crossword App
-I feel a big reason that I got into solving the NYT crossword was because their mobile app made it very easy to access/complete.
-Unfortunately at the present time the New Yorker does not have an android app (for either the magazine or crossword). 
-My goal is to eventually create a standalone mobile app to solve the New Yorker crosswords on android.
-Creating a desktop application in python seemed a reasonable first step, with porting being a future step.
+A big reason that I got into solving the NYT crossword was because their mobile app made it very easy and pleasant to play.
+Unfortunately, at the present time the New Yorker does not have an Android app (for the magazine or crossword). 
+My goal is to eventually create a standalone mobile app to solve the New Yorker crosswords on Android.
+Creating a desktop application in Python seemed a reasonable first step, with porting to mobile being a future step.
 
 
 ## Setup
@@ -63,7 +63,7 @@ browser window
 ## Things to work on
 
 ### GUI
-  - Add tick box to left section (beside each crossword name) to mark completed
+  - Add tick box to left section (beside each crossword name) to mark completion
   - Make left/right section divider adjustable
   - Add maximize/minimize buttons to control pane
 
@@ -73,7 +73,7 @@ browser window
   - Enable Add functionality to GUI/program to add local files to the library
 
 ### Offline Solving
-  - Update the scrapy spider to save the new yorker crosswords to a local directory
+  - Update the scrapy spider to save the New Yorker crosswords to a local directory
 
 ### Android
   - Generate an APK for the app
